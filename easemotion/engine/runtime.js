@@ -48,7 +48,14 @@ function getStyleElement() {
  */
 function processElement(el) {
   const value = el.getAttribute('em');
-  if (!value) return;
+  if (!value) {
+    for (const className of Array.from(el.classList)) {
+      if (/^_em_[0-9a-f]{6}$/.test(className)) {
+        el.classList.remove(className);
+      }
+    }
+    return;
+  }
 
   const ast = parse(value);
   if (!ast) {
@@ -59,6 +66,13 @@ function processElement(el) {
   }
 
   const cls = className(ast);
+
+  // Remove any other _em_ classes that are NOT the correct current one
+  for (const className of Array.from(el.classList)) {
+    if (/^_em_[0-9a-f]{6}$/.test(className) && className !== cls) {
+      el.classList.remove(className);
+    }
+  }
 
   // Inject CSS rule only once per unique configuration
   if (!injected.has(cls)) {
