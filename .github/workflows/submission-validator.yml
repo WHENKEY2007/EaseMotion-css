@@ -85,7 +85,24 @@ jobs:
             const failures = [];
             const successes = [];
 
-            let hasExistingCodeChanges = false;
+            // Check collaborator permissions of the PR author
+            let isMaintainer = false;
+            try {
+              const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: context.payload.pull_request.user.login
+              });
+              isMaintainer = ['admin', 'write'].includes(permission.permission);
+              console.log(`PR Author: ${context.payload.pull_request.user.login}, Permission: ${permission.permission}, isMaintainer: ${isMaintainer}`);
+            } catch (e) {
+              console.warn('Could not check collaborator permission level:', e.message);
+            }
+
+            let isSpamExploit = false;
+
+            if (!isMaintainer) {
+              let hasExistingCodeChanges = false;
             let hasDeletions = false;
             const modifiedExistingFiles = [];
 
@@ -298,6 +315,7 @@ jobs:
               } else {
                 successes.push({ folder, present });
               }
+            }
             }
 
             // Store results
