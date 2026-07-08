@@ -73,24 +73,31 @@
       document.head.appendChild(styleElement);
     }
 
-    // Add event listeners for dynamic underline width adjustment
-    var resizeTimeout;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(function () {
-        Array.prototype.forEach.call(tabContainers, function (container) {
-          updateUnderlineWidth(container);
-        });
-      }, 150);
-    });
+    // Add event listeners for dynamic underline width adjustment (only once)
+    if (!window._easeTabsResizeBound) {
+      window._easeTabsResizeBound = true;
+      var resizeTimeout;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function () {
+          var currentContainers = document.querySelectorAll('.ease-tabs');
+          Array.prototype.forEach.call(currentContainers, function (container) {
+            updateUnderlineWidth(container);
+          });
+        }, 150);
+      });
+    }
 
-    // Update underline width on tab change
+    // Update underline width on tab change (ensure single listener per input)
     Array.prototype.forEach.call(tabContainers, function (container) {
       var inputs = container.querySelectorAll('.ease-tab-input');
       Array.prototype.forEach.call(inputs, function (input) {
-        input.addEventListener('change', function () {
-          updateUnderlineWidth(container);
-        });
+        if (!input.hasAttribute('data-ease-tabs-bound')) {
+          input.setAttribute('data-ease-tabs-bound', 'true');
+          input.addEventListener('change', function () {
+            updateUnderlineWidth(container);
+          });
+        }
       });
     });
   }
