@@ -1,11 +1,6 @@
-# Fix: Modal Focus Stack
+# Fix: Stacked Modal Focus Restoration
 
-Replaces the single `previousFocusedElement` variable in `core/modal.js` with an array-based stack so focus is correctly restored through nested modal states.
+Resolves a focus tracking regression in `modal.js` when opening a second modal from inside an active modal.
 
-## Usage
-
-Open `demo.html`. Click "Open modal 1", then inside it click "Open modal 2 (nested)", then close both. Toggle between "Stack (fix)" and "Single variable (bug)" modes to compare.
-
-## Why
-
-When two modals are open simultaneously (e.g., rapid hash changes), the single `previousFocusedElement` gets overwritten by the inner modal's focus. When both close, focus is lost entirely instead of returning to the original trigger. A stack preserves the full focus history so each close restores the correct target.
+## What does this do?
+- **Focus Stack:** Replaces the single global `previousFocusedElement` variable with a LIFO focus stack array, guaranteeing focus returns to the correct initiator element when modals are dismissed in reverse order.
